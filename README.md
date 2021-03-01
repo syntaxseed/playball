@@ -9,6 +9,9 @@
 
 ⚾ Ansible Playbooks for deploying PHP and MySQL applications. ⚾
 
+<img align="right" style="margin:5px;" src="docs/graphic.png">
+
+
 Docs: https://syntaxseed.github.io/playball/
 
 Version: 1.0.0 (BETA)

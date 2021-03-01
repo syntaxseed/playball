@@ -2,6 +2,9 @@
 
 ⚾ Ansible Playbooks for deploying PHP and MySQL applications. ⚾
 
+<img align="right" style="margin:5px;" src="graphic.png">
+
+
 Licence: GPLv3 (see /LICENSE.md)
 
 Author: **Sherri Wheeler** (Twitter [@SyntaxSeed](https://twitter.com/SyntaxSeed)) https://syntaxseed.com
