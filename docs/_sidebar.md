@@ -1,4 +1,4 @@
-&nbsp;⚾ PHP Playball
+&nbsp;⚾ PHP Playball ⚾
 
 - [Overview](README.md)
 - [Quick Start](quick-start.md)
