@@ -1,0 +1,22 @@
+---
+# Default vars file for deployphp
+# !! Over-Ride these in your playbook. !!
+
+# ansibleprivatepath: Private path to where Ansible can store and refer info.
+ansibleprivatepath: '/home/myuser/ansible/examplecom'
+
+# composercommand: The full command to use to call PHP Composer. Might be a path to a phar.
+composercommand: 'composer'
+
+# deploypath: Path on the server to deploy to.
+# Override with cli param when running playbook. Ie:  --extra-vars "deploypath='/home/user/www/www/deploy'"
+deploypath: '/var/www/example.com/deploy'
+
+# gitrepo: Git repository to pull from ex 'git://github.com/user/repo.git'
+gitrepo: 'git://github.com/user/package.git'
+
+# gitversion: Git branch/tag to clone.
+gitversion: 'master'
+
+# releaseskept: How many releases in addition to the current one to keep.
+releaseskept: 3

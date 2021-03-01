@@ -1,0 +1,122 @@
+---
+# About:
+# This file sets configuration and enables/disables various deployment tasks for the deployphp role.
+# Uses the deploy_helper module. See: https://docs.ansible.com/ansible/latest/modules/deploy_helper_module.html
+
+- name: PHP DEPLOY - example.com website.
+  hosts: example.com
+  become: false
+
+  # ************* Configuration ***********************
+  vars:
+    # -------------- ROLES CONFIG: Set up values used by the Roles. ----------------
+    # NOTE: Commented out vars are already defined in role defaults. Uncomment to override.
+
+    # *** Configuration for deployphp Role:
+
+    # DEPLOYPATH: Where to deploy to.
+    #   Can override with cli param when running playbook. Ie:  --extra-vars "deploypath='/var/www/example.com/deploy'"
+    deploypath: '/var/www/example.com/deploy'
+
+    # ANSIBLEPRIVATEPATH: Where some configuration is stored for deployphp and for mysqlmigration for THIS deploy.
+    ansibleprivatepath: '/home/myuser/ansible/examplecom'
+
+    # GITREPO: Git repo to pull from ex 'git://github.com/user/repo.git'
+    gitrepo: 'git://github.com/syntaxseed/playball.git'
+    #gitversion: 'master' # Git branch/tag to clone.
+
+    # RELEASESKEPT: How many old releases to keep (other than the current/live release).
+    #releaseskept: 3
+
+    # COMPOSERCOMMAND: The full command to use to call PHP Composer. Can be a path to a phar.
+    composercommand: 'composer'  #'path/to/composer.phar'
+
+    # *** Configuration for mysqlmigration Role:
+
+    # MYSQLDATABASE: The name of the database to run migrations on.
+    mysqldatabase: 'db1_example'
+
+    # MYSQLCONFIG: location of connection config info (must already exist on server). This file should exist on the server and look like:
+    #  [client]
+    #  user=db1user1
+    #  password=mysqlpassword123
+    #  host=localhost
+    mysqlconfig: '/home/myuser/ansible/examplecom/.my.cnf'
+
+    # -------------- TASKS CONFIG: Individual Deploy Tasks - enable/disable with true/false. --------------
+
+    # Enable/Disable Entire Roles:
+    RUN_PHP_DEPLOYMENT: true      # Run some of the tasks in the deployphp role.
+    RUN_MYSQL_MIGRATIONS: true    # Run dated sql files on the database in order. Record last run date, so won't run them again.
+
+    # ----- DeployPHP Config -------
+
+    # TASK: Ensure a list of directories exists to be shared by or copied into the releases (such as logs). Needed for symlinks, copying, etc. You should manually add files to these dirs to be used by later tasks (like symlinking secret config files.)
+    CREATE_SHARED_DIRS: true
+    CREATE_SHARED_DIRS_LIST:
+      - secure
+      - logs
+
+    # TASK: Whether to clone the repo from Git. You will USUALLY want to do this.
+    CLONE_PROJECT_FROM_GIT: true
+
+    # TASK: Run a 'composer install --no-dev --ignore-platform-reqs' in the root of the project.
+    COMPOSER_INSTALL_DEPENDENCIES: true
+
+    # TASK: Copy files and directories from a previous release.
+    COPY_FROM_PREV_RELEASE: false
+    COPY_FROM_PREV_RELEASE_LIST:
+      - blog
+
+    # TASK: Copy items from the shared dir (src) to the release (dest). Use this instead of symlink if desired (especially if it might change between releases).
+    COPY_FROM_SHARED_DIR: true
+    COPY_FROM_SHARED_DIR_LIST:
+      - src: secure/secrets-PRODUCTION.php
+        dest: config/secrets-PRODUCTION.php
+
+    # TASK: Decrypt files that were encrypted with Ansible vault (will fetch the files locally temporarily then decrypt and copy back to the host).
+    DECRYPT_VAULT_FILES: true
+    DECRYPT_VAULT_FILES_LIST:
+      - config/keys.php
+
+    # TASK: Delete files and directories under the deployed release. Items not used by the production site like tests and git files.
+    DELETE_FILES_FOLDERS: true
+    DELETE_FILES_FOLDERS_LIST:
+      - README.md
+      - phpunit.xml
+      - composer.json
+      - .gitignore
+      - .git/
+      - hooks/
+      - tests/
+
+    # TASK: Create some symlinks. Usually from (path) in the release to the shared dir (src).
+    CREATE_SYMLINKS: true
+    CREATE_SYMLINK_LIST:
+      - path: logs
+        src: logs
+
+    # TASK: Based on regex, edit lines in some files (located in release dir). Example: set environment to PRODUCTION.
+    EDIT_LINES_IN_FILES: true
+    EDIT_LINE_IN_FILES_LIST:
+      - path: 'config/config.php'
+        regexp: "^.*'environment' => 'DEV',"
+        line: "        'environment' => 'PRODUCTION',"
+
+    # TASK: Change owner of the release directory in case the user ansible ran as is not the same as the webserver.
+    CHANGE_OWNER: false
+    CHANGE_OWNER_NAME: 'www-data'
+
+    # ----- MysqlMigration Config -------
+
+    # TASK: Run sql files against the database (dated migrations files).
+    #   File names look like: with file names like: 20190625210800_add_table.sql
+    #   Timestamp of last attempt to run migrations is stored in <ansibleprivatepath>/mysql_migrations.dat, so next time only new migrations will be run.
+    #   If not using the mysqlmigration role, you can comment out this line.
+    MYSQL_MIGRATIONS_PATH: '{{deploypath}}/current/sql/migrations/'
+
+
+  # -------------- Include the deployphp and mysqlmigration roles. --------------
+  roles:
+    - { role: '../Deploy/Roles/deployphp', when: RUN_PHP_DEPLOYMENT == true }
+    - { role: '../Deploy/Roles/mysqlmigration', when: RUN_MYSQL_MIGRATIONS == true }

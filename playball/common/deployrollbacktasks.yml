@@ -1,0 +1,13 @@
+- name: Get Release Directory Name
+  shell: cd {{ deploypath }}/releases && ls -Art | tail -n {{ releasenum }} | head -n 1
+  register: releasedir
+
+- set_fact: releasedir={{ releasedir.stdout }}
+
+- debug: msg="Changing to release {{ releasedir }} which is number {{ releasenum }}."
+
+- name: Change Current Symlink to Found Release
+  file:
+    path: '{{ deploypath }}/current'
+    src: '{{ deploypath }}/releases/{{ releasedir }}/'
+    state: link

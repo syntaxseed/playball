@@ -1,0 +1,66 @@
+---
+# mysqlmigration
+# This role runs a series of SQL files against a MySQL database.
+# The files are named with a YYYYMMDDHHMMSS timestamp followed by an underscore like so: 20190521080100_create_tables.sql.
+# Requires a .my.cnf file with username and password (var mysqlconfig).
+# Ansible records the timestamp of the last migration ran in a file on the machine, and next time, only runs new files.
+#   TODO: Capability to roll back migrations?
+
+- name: Confirm MySQL Database Exists And Can Connect
+  mysql_db:
+    name: '{{ mysqldatabase }}'
+    state: present
+    config_file: '{{ mysqlconfig }}'
+
+- name: Check if Migrations Tracking File Exists
+  stat:
+    path: '{{ ansibleprivatepath }}/mysql_migrations.dat'
+  register: empty_migration
+
+- name: Create Migrations Tracking File if Missing
+  when: empty_migration.stat.exists == false
+  copy:
+    dest: '{{ ansibleprivatepath }}/mysql_migrations.dat'
+    content: |
+        0
+
+- name: Load Migrations Tracking Datetime
+  command: "cat {{ ansibleprivatepath }}/mysql_migrations.dat"
+  register: migrations_last_date
+- set_fact: migrations_last_date='{{ migrations_last_date.stdout }}'
+  no_log: true
+
+- debug: msg="Last migration date is {{migrations_last_date}}"
+
+- name: Load List Of Migrations from Directory
+  shell: cd '{{ MYSQL_MIGRATIONS_PATH }}' && ls [0-9]* | awk -F '_' '{if ($1 > {{migrations_last_date}}) print $0}'
+  register: migration_files
+- set_fact: migration_files='{{ migration_files.stdout_lines }}'
+  no_log: true
+
+- debug: msg="SQL Migration to be run= {{item}}"
+  with_items: '{{migration_files}}'
+
+# Find the date of the last migration we are going to run. If not running any, use the date from the dat file.
+- name: Parse Last Migration Timestamp From Files List
+  shell: cd '{{ MYSQL_MIGRATIONS_PATH }}' && ls [0-9]* | awk -F '_' '{if ($1 > {{migrations_last_date}}) print $1}'
+  register: migration_files_dates
+- set_fact: migration_last_tstamp='{{ migration_files_dates.stdout_lines[-1] }}'
+  when: migration_files_dates.stdout_lines is defined and (migration_files_dates.stdout_lines|length>0)
+- set_fact: migration_last_tstamp='{{migrations_last_date}}'
+  when: migration_files_dates.stdout_lines is not defined or (migration_files_dates.stdout_lines|length==0)
+
+- debug: msg="SQL Migration Last Timestamp= {{migration_last_tstamp}}"
+
+# Run migrations only from the list.
+- name: Run Migration Scripts
+  mysql_db:
+    name: '{{ mysqldatabase }}'
+    state: import
+    target: '{{ MYSQL_MIGRATIONS_PATH }}/{{item}}'
+    config_file: '{{ mysqlconfig }}'
+  with_items: '{{migration_files}}'
+
+# Write last run date to the file.
+- name: Save Current Migrations Run Datetime
+  shell: "echo '{{migration_last_tstamp}}' > {{ ansibleprivatepath }}/mysql_migrations.dat"

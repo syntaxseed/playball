@@ -1,0 +1,92 @@
+- name: Get Previous Release Directory Name
+  shell: cd {{ deploypath }}/releases && ls -Art | tail -n 1 | head -n 1
+  register: prevreleasedir
+- set_fact: prev_release_path='{{ deploypath }}/releases/{{ prevreleasedir.stdout }}'
+  when: prevreleasedir.stdout != ""
+- set_fact: prev_release_path=''
+  when: prevreleasedir.stdout == ""
+- debug: msg="Old release located at {{ prev_release_path }}."
+
+- name: Initialize the deploy root and gather facts
+  deploy_helper:
+    path: '{{ deploypath }}/'
+    state: present
+
+- name: Create Dirs in Shared Dir
+  when: CREATE_SHARED_DIRS == true
+  file:
+    path: '{{ deploy_helper.shared_path }}/{{ item }}'
+    state: directory
+  with_items: '{{CREATE_SHARED_DIRS_LIST}}'
+
+
+- name: Clone Project To New Release Dir
+  when: CLONE_PROJECT_FROM_GIT == true
+  git:
+    repo: '{{gitrepo}}'
+    dest: '{{ deploy_helper.new_release_path }}'
+    version: '{{gitversion}}'
+    accept_hostkey: yes
+
+- name: Create Project Dir if not Cloning Repo
+  when: CLONE_PROJECT_FROM_GIT == false
+  file:
+    path: '{{ deploy_helper.new_release_path }}'
+    state: directory
+
+- name: Add Unfinished File (to clean up after completion)
+  file:
+    path: '{{ deploy_helper.new_release_path }}/{{ deploy_helper.unfinished_filename }}'
+    state: touch
+
+- name: Composer Install Dependencies
+  when: COMPOSER_INSTALL_DEPENDENCIES == true
+  shell: cd {{ deploy_helper.new_release_path }} && ~/private/utils/composer.phar install --no-dev --ignore-platform-reqs
+
+- name: Copy Files and Folders From Previous release
+  when: COPY_FROM_PREV_RELEASE == true && prev_release_path != ""
+  shell: cp {{prev_release_path}}/{{item}} {{ deploy_helper.new_release_path }}/{{item}}
+  with_items: '{{COPY_FROM_PREV_RELEASE_LIST}}'
+
+- name: Copy Files and Folders From Shared Dir
+  when: COPY_FROM_SHARED_DIR == true
+  shell: cp {{ deploy_helper.shared_path }}/{{item.src}} {{ deploy_helper.new_release_path }}/{{item.dest}}
+  with_items: '{{COPY_FROM_SHARED_DIR_LIST}}'
+
+- name: Delete Files And Folders Not Needed
+  when: DELETE_FILES_FOLDERS == true
+  file:
+    path: "{{ deploy_helper.new_release_path }}/{{item}}"
+    state: absent
+  with_items: '{{DELETE_FILES_FOLDERS_LIST}}'
+
+- name: Delete Existing Symlink Sources
+  when: CREATE_SYMLINKS == true
+  file:
+    state: absent
+    path: '{{ deploy_helper.new_release_path }}/{{ item.path }}'
+  with_items: '{{CREATE_SYMLINK_LIST}}'
+
+- name: Add Symlink Directories From New Release to Shared
+  when: CREATE_SYMLINKS == true
+  file:
+    path: '{{ deploy_helper.new_release_path }}/{{ item.path }}'
+    src: '{{ deploy_helper.shared_path }}/{{ item.src }}'
+    state: link
+    force: yes
+  with_items: '{{CREATE_SYMLINK_LIST}}'
+
+- name: Edit Lines In Files (set environment to PRODUCTION)
+  when: EDIT_LINES_IN_FILES == true
+  lineinfile:
+    path: '{{ deploy_helper.new_release_path }}/{{item.path}}'
+    regexp: '{{item.regexp}}'
+    line: '{{item.line}}'
+  with_items: '{{EDIT_LINE_IN_FILES_LIST}}'
+
+- name: Finalize Deployment (remove the unfinished file, prune old releases and switch the 'current' symlink)
+  deploy_helper:
+    path: '{{ deploypath }}/'
+    release: '{{ deploy_helper.new_release }}'
+    state: finalize
+    keep_releases: '{{releaseskept}}'

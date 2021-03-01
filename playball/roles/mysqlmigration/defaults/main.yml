@@ -1,0 +1,12 @@
+---
+# Default vars file for mysqlmigration
+# !! Over-Ride these in your playbook. !!
+
+# ansibleprivatepath: Private path on server where Ansible can store and refer info.
+ansibleprivatepath: '/home/myuser/ansible/examplecom'
+
+# mysqlconfig: Where the file with the mysql connection config is (.my.cnf).
+mysqlconfig: '/home/myuser/ansible/examplecom/.my.cnf'  # The config file for mysql connections via the mysql_db module.
+
+# mysqldatabase: Name of the database to confirm exists and perform tasks on.
+mysqldatabase: 'db_name'

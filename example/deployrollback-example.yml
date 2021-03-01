@@ -1,0 +1,17 @@
+---
+- name: General PHP Deployment - ROLLBACK
+  hosts: example.com
+  become: false
+  vars:
+    # RELEASENUM: Which release to rollback to. Defaults to most recent (1). Counts backward in time.
+    #   Too large of a number will just use the oldest release.
+    #   Can override releasenum with cli param when running playbook. Ie previous release:  --extra-vars "releasenum=2"
+    releasenum: 1
+
+    # DEPLOYPATH: Where to deploy to.
+    #   Can override with cli param when running playbook. Ie:  --extra-vars "releasenum=2 deploypath='/home/example/www/www/deploy'"
+    deploypath: '/home/example/www/deploy'
+
+  tasks:
+    - name: Import General Rollback Tasks
+      import_tasks: ../../Deploy/Common/deployrollbacktasks.yml
