@@ -21,4 +21,4 @@ Author: **Sherri Wheeler** (Twitter [@SyntaxSeed](https://twitter.com/SyntaxSeed
 ## Roles:
 
 * DeployPHP
-* MYSQLMigration
+* MySQLMigration
