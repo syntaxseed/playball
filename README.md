@@ -14,7 +14,7 @@
 
 Docs: https://syntaxseed.github.io/playball/
 
-Version: 1.0.0 (BETA)
+Version: 1.0.1 (BETA)
 
 Author: **Sherri Wheeler** (Twitter [@SyntaxSeed](https://twitter.com/SyntaxSeed)) https://syntaxseed.com
 
