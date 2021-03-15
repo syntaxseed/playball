@@ -1,0 +1,15 @@
+# This is the local ansible 'hosts' file.
+#
+# Your global inventory file lives in /etc/ansible/hosts, however this file defines hosts local to this project.
+# This is perferrable if you want all your settings to live in your project repo.
+# The path to this file is set in ansible.cfg.
+# Your host definition should include the path to your private key to log into the server.
+#
+#   - Comments begin with the '#' character
+#   - Blank lines are ignored
+#   - Groups of hosts are delimited by [header] elements
+#   - You can enter hostnames or ip addresses
+#   - A hostname/ip can be a member of multiple groups
+
+[clientABC]
+server123.com ansible_port=22 ansible_user=serveruser ansible_ssh_private_key_file=~/.ssh/id_ansible_server123

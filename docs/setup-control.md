@@ -22,7 +22,10 @@ The machine or server you will run your playbooks from. This might be your own d
 
 ## 3. Add Ansible Hosts
 
-- Create or edit the Ansible hosts file (ex `/etc/ansible/hosts`) to add the host (ex `server123.com`) you will be deploying to, to a new group (ex `[clientABC]`) in the inventory:
+- Create or edit the local Ansible hosts file (`example/hosts-local`) and point to this file in the `inventory` setting in ansible.cfg.
+- If you prefer to use the control machine's global hosts file (ex `/etc/ansible/hosts`), then comment out the `inventory` line in ansible.cfg.
+
+- Add the host (ex `server123.com`) you will be deploying to, to a new group (ex `[clientABC]`) in the inventory:
   ```
   [clientABC]
   server123.com ansible_port=22 ansible_user=serveruser ansible_ssh_private_key_file=~/.ssh/id_ansible_server123
