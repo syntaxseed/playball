@@ -50,13 +50,13 @@
   shell: cd {{ deploy_helper.new_release_path }} && {{ composercommand }} install --no-dev --ignore-platform-reqs
 
 - name: Copy Files and Folders From Previous release
-  when: COPY_FROM_PREV_RELEASE == true && prev_release_path != ""
-  shell: cp {{prev_release_path}}/{{item}} {{ deploy_helper.new_release_path }}/{{item}}
+  when: COPY_FROM_PREV_RELEASE == true and prev_release_path != ""
+  shell: cp -rp {{prev_release_path}}/{{item.src}} {{ deploy_helper.new_release_path }}/{{item.dest}}
   with_items: '{{COPY_FROM_PREV_RELEASE_LIST}}'
 
 - name: Copy Files and Folders From Shared Dir
   when: COPY_FROM_SHARED_DIR == true
-  shell: cp {{ deploy_helper.shared_path }}/{{item.src}} {{ deploy_helper.new_release_path }}/{{item.dest}}
+  shell: cp -rp {{ deploy_helper.shared_path }}/{{item.src}} {{ deploy_helper.new_release_path }}/{{item.dest}}
   with_items: '{{COPY_FROM_SHARED_DIR_LIST}}'
 
 # Tasks For Decrypting Vault Files - Fetch to local temp dir, decrypt and copy to remote, delete temp dir.
