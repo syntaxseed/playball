@@ -119,6 +119,8 @@
     recurse: true
   become: yes
 
+- debug: msg="NEW release located at {{ deploy_helper.new_release_path }}."
+
 - name: Finalize Deployment # (remove the unfinished file, prune old releases and switch the 'current' symlink)
   deploy_helper:
     path: '{{ deploypath }}/'
