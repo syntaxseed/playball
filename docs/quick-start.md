@@ -2,6 +2,8 @@
 
 A quick overview of using PHP Playball.
 
+First [Get A Copy of PHP Playball](get-playball.md) and add it to your project's repo or create a repo specifically for all your deployments.
+
 ## Setup Control Machine
 
 [Detailed Guide](setup-control.md)
@@ -31,21 +33,6 @@ If the server does not have Python3 installed, you'll see a message.
 
 - Ensure Python3 and the PyMySQL module are installed.
 
-## Grab PHP Playball From GitHub
-
-Get a copy of the PHP [Playball repo from GitHub](https://github.com/syntaxseed/playball), either by cloning it, or downloading a zip. It is recommended to keep this inside your project's repo.
-
-> Note that updates to PHP Playball might not be backward compatible, so pulling updates from this project into your local copy might require updates to your playbooks' configuration.
-
-You'll also want to make a copy of the example/ directory for your site.
-
-```bash
-mkdir deploy
-cd deploy
-git clone git@github.com:syntaxseed/playball.git .
-rm -r .git/
-cp example/ playbooks/
-```
 
 ## Configure The Playbooks
 

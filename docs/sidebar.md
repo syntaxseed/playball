@@ -3,6 +3,7 @@
 - [Overview](README.md)
 - [Quick Start](quick-start.md)
 - Set Up:
+  - [Get PHP Playball](get-playball.md)
   - [Setup Control Machine](setup-control.md)
   - [Setup Host Machine](setup-host.md)
 - Usage:

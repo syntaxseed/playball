@@ -39,8 +39,10 @@ Ansible stores the last timestamp of the last migration run in the file `{ansibl
 
 Ansible looks into your migrations path (`MYSQL_MIGRATIONS_PATH`) and reads the list of all SQL files with filenames timestamped AFTER the last timestamp retrieved from the `mysql_migrations.dat`.
 
+> TIP: To re-run *all* migrations from the beginning, change the contents of the `mysql_migrations.dat` file to `0`. To rerun just the migrations after a certain date, change this file to a date just *before* the first migration you want to run.
+
 These files are run against the database in order.
 
 The timestamp of the last run file is then saved in `mysql_migrations.dat`. This is how PHP Playball knows not to run the same migrations more than once.
 
-TIP: If multiple developers are working on the project, you should co-ordinate the creation of SQL Migrations to ensure the timestamps keep them in the proper order.
+> TIP: If multiple developers are working on the project, you should co-ordinate the creation of SQL Migrations to ensure the timestamps keep them in the proper order.
