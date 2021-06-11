@@ -118,5 +118,5 @@
 
   # -------------- Include the deployphp and mysqlmigration roles. --------------
   roles:
-    - { role: '../Deploy/Roles/deployphp', when: RUN_PHP_DEPLOYMENT == true }
-    - { role: '../Deploy/Roles/mysqlmigration', when: RUN_MYSQL_MIGRATIONS == true }
+    - { role: '../playball/roles/deployphp', when: RUN_PHP_DEPLOYMENT == true }
+    - { role: '../playball/roles/mysqlmigration', when: RUN_MYSQL_MIGRATIONS == true }

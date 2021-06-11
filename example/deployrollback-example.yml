@@ -14,4 +14,4 @@
 
   tasks:
     - name: Import General Rollback Tasks
-      import_tasks: ../../Deploy/Common/deployrollbacktasks.yml
+      import_tasks: ../playball/common/deployrollbacktasks.yml
